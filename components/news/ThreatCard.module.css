@@ -1,0 +1,132 @@
+.threat-card {
+  padding: 20px;
+  transition: all 0.3s ease;
+  cursor: default;
+  background: rgba(20, 27, 45, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.threat-card:hover {
+  transform: translateY(-2px);
+  background: rgba(26, 34, 56, 0.85);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #F0F4FF;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.card-summary {
+  font-size: 13px;
+  color: #8892B0;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.affected-targets {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  color: #4A5568;
+}
+
+.target-chip {
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  font-size: 11px;
+  color: #8892B0;
+  text-transform: capitalize;
+}
+
+.tips-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  border-radius: 6px;
+  color: #00FF88;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.tips-toggle:hover {
+  background: rgba(0, 255, 136, 0.1);
+}
+
+.tips-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 12px;
+  background: rgba(0, 255, 136, 0.03);
+  border-radius: 6px;
+  animation: slide-in-up 0.3s ease-out forwards;
+}
+
+.tips-list li {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: #8892B0;
+  line-height: 1.5;
+  padding: 4px 0;
+}
+
+.tip-bullet {
+  color: #00FF88;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.time-ago {
+  font-size: 11px;
+  color: #4A5568;
+}
+
+.read-more {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #00FF88;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.read-more:hover {
+  color: #00CC6A;
+}

@@ -1,0 +1,133 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: 30;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar-menu {
+  display: none;
+  background: none;
+  border: none;
+  color: #8892B0;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  align-items: center;
+  justify-content: center;
+}
+
+.topbar-menu:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #F0F4FF;
+}
+
+@media (max-width: 768px) {
+  .topbar-menu {
+    display: flex;
+  }
+}
+
+.topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumb-icon {
+  font-size: 16px;
+}
+
+.page-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #F0F4FF;
+  margin: 0;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.threat-level {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.threat-label {
+  color: #8892B0;
+}
+
+.threat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@media (max-width: 640px) {
+  .threat-level {
+    display: none;
+  }
+}
+
+.topbar-btn {
+  position: relative;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: #8892B0;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.topbar-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #F0F4FF;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FF3B3B;
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 50%;
+  line-height: 1;
+}

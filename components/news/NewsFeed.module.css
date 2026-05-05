@@ -1,0 +1,115 @@
+.news-feed { max-width: 1200px; margin: 0 auto; }
+
+.feed-header { margin-bottom: 20px; }
+
+.feed-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+
+.live-indicator {
+  display: flex; align-items: center; gap: 4px; padding: 4px 10px;
+  background: rgba(255, 59, 59, 0.1); border: 1px solid rgba(255, 59, 59, 0.2);
+  border-radius: 20px; color: #FF3B3B; font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.feed-title { font-size: 24px; font-weight: 700; color: #F0F4FF; margin: 0; }
+
+.feed-meta { display: flex; align-items: center; gap: 12px; }
+
+.last-update { font-size: 12px; color: #4A5568; }
+
+.refresh-btn { padding: 6px 14px; font-size: 12px; }
+
+.spinning { animation: scan-radar 1s linear infinite; }
+
+/* Ticker */
+.ticker-wrap {
+  background: #0F1629; border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px; padding: 10px 0; margin-bottom: 20px;
+  overflow: hidden; position: relative;
+}
+
+.ticker-wrap::before, .ticker-wrap::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 60px; z-index: 1; pointer-events: none;
+}
+
+.ticker-wrap::before { left: 0; background: linear-gradient(to right, #0F1629, transparent); }
+.ticker-wrap::after { right: 0; background: linear-gradient(to left, #0F1629, transparent); }
+
+.ticker-track {
+  display: inline-flex; gap: 40px; animation: ticker-scroll 40s linear infinite; white-space: nowrap;
+}
+
+.ticker-wrap:hover .ticker-track { animation-play-state: paused; }
+
+.ticker-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8892B0; }
+
+.ticker-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.ticker-type { font-size: 14px; }
+
+.ticker-text { max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
+
+/* Filters */
+.filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; color: #4A5568; }
+
+.filter-chip {
+  padding: 6px 14px; background: #141B2D; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; color: #8892B0; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; font-family: 'Space Grotesk', sans-serif;
+}
+
+.filter-chip:hover { border-color: #00FF88; color: #00FF88; }
+
+.filter-active { background: rgba(0, 255, 136, 0.08); border-color: #00FF88; color: #00FF88; }
+
+/* Featured */
+.featured-section { margin-bottom: 24px; }
+
+.section-label {
+  font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  color: #FF3B3B; margin-bottom: 12px; text-transform: uppercase;
+}
+
+/* Grid */
+.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+
+@media (max-width: 768px) { .news-grid { grid-template-columns: 1fr; } }
+
+/* Loading */
+.loading-grid { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+
+.skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; width: 100%; }
+
+.skeleton-card { height: 200px; background: #141B2D; border-radius: 12px; position: relative; overflow: hidden; }
+
+.skeleton-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.04) 50%, transparent 75%);
+  background-size: 200% 100%; animation: shimmer 1.5s linear infinite;
+}
+
+.error-box { text-align: center; padding: 40px; color: #FFB800; }
+.error-box p { margin-bottom: 16px; }
+
+.empty-state { text-align: center; padding: 40px; color: #4A5568; }
+
+/* Keyframes - must be in the module since CSS Modules scope animation names */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes scan-radar {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
