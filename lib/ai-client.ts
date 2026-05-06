@@ -1,18 +1,21 @@
 // ============================================================
-// CyberShield AI — AI Client (supports multiple providers)
+// CyberShield AI — AI Client
+// Per Ollama Cloud docs: https://docs.ollama.com/cloud
+// Native API: POST https://ollama.com/api/chat
 // ============================================================
 
 // ─── Provider Config ────────────────────────────────────────
-const PROVIDER = process.env.AI_PROVIDER || 'gemini'; // 'gemini' | 'ollama'
+const PROVIDER = process.env.AI_PROVIDER || 'ollama'; // 'ollama' | 'gemini'
 
-// Gemini
+// Gemini (backup)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
-// Ollama Cloud
+// Ollama Cloud — native API (https://docs.ollama.com/cloud)
+// Free model confirmed working: gemma3:4b
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY || '';
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'https://ollama.com/v1';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:cloud';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma3:4b';
+const OLLAMA_BASE = 'https://ollama.com'; // native base — no /v1
 
 // ─── Gemini Chat ────────────────────────────────────────────
 async function geminiChat(
@@ -51,12 +54,12 @@ async function geminiGenerate(prompt: string, maxTokens?: number) {
   return result.response.text();
 }
 
-// ─── Ollama Cloud Chat (OpenAI-compatible) ──────────────────
+// ─── Ollama Cloud Chat (Native API per docs.ollama.com/cloud) ──
 async function ollamaChat(
   messages: { role: string; content: string }[],
   options?: { systemPrompt?: string; maxTokens?: number }
 ) {
-  const allMessages = [];
+  const allMessages: { role: string; content: string }[] = [];
   if (options?.systemPrompt) {
     allMessages.push({ role: 'system', content: options.systemPrompt });
   }
@@ -65,7 +68,8 @@ async function ollamaChat(
     content: m.content,
   })));
 
-  const response = await fetch(`${OLLAMA_BASE_URL}/chat/completions`, {
+  // Native Ollama Cloud endpoint per official docs
+  const response = await fetch(`${OLLAMA_BASE}/api/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -74,8 +78,7 @@ async function ollamaChat(
     body: JSON.stringify({
       model: OLLAMA_MODEL,
       messages: allMessages,
-      max_tokens: options?.maxTokens || 4000,
-      temperature: 0.7,
+      stream: false,
     }),
   });
 
@@ -85,7 +88,8 @@ async function ollamaChat(
   }
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content || '';
+  // Native Ollama response: { message: { role, content } }
+  return data.message?.content || '';
 }
 
 async function ollamaGenerate(prompt: string, maxTokens?: number) {
@@ -103,7 +107,7 @@ export async function chatCompletion(
   if (GEMINI_API_KEY) {
     return geminiChat(messages, options);
   }
-  throw new Error('No AI provider configured. Set GEMINI_API_KEY or OLLAMA_API_KEY in .env.local');
+  throw new Error('No AI provider configured. Set OLLAMA_API_KEY in environment variables.');
 }
 
 export async function generateText(
@@ -116,10 +120,10 @@ export async function generateText(
   if (GEMINI_API_KEY) {
     return geminiGenerate(prompt, options?.maxTokens);
   }
-  throw new Error('No AI provider configured. Set GEMINI_API_KEY or OLLAMA_API_KEY in .env.local');
+  throw new Error('No AI provider configured. Set OLLAMA_API_KEY in environment variables.');
 }
 
 // Check if any AI provider is configured
 export function isAIConfigured(): boolean {
-  return !!(GEMINI_API_KEY || OLLAMA_API_KEY);
+  return !!(OLLAMA_API_KEY || GEMINI_API_KEY);
 }
