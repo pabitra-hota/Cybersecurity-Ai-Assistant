@@ -109,9 +109,13 @@ export default function SignupPage() {
                 <button type="button" className="toggle-pw" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
               </div>
               {password && (
-                <div className="strength-bar">
-                  <div className="strength-fill" style={{ width: `${passwordStrength * 25}%`, background: strengthColors[passwordStrength] }} />
-                  <span style={{ color: strengthColors[passwordStrength] }}>{strengthLabels[passwordStrength]}</span>
+                <div className="strength-wrapper">
+                  <div className="strength-track">
+                    <div className="strength-fill" style={{ width: `${passwordStrength * 25}%`, background: strengthColors[passwordStrength] }} />
+                  </div>
+                  <span className="strength-label" style={{ color: strengthColors[passwordStrength] }}>
+                    {strengthLabels[passwordStrength]}
+                  </span>
                 </div>
               )}
               <div className="field"><div className="field-icon"><Lock size={16} /></div><input id="signup-confirm-password" type="password" className="input-field" placeholder="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={{ paddingLeft: 40 }} /></div>
@@ -154,9 +158,10 @@ export default function SignupPage() {
         .field { position: relative; margin-bottom: 12px; }
         .field-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
         .toggle-pw { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; }
-        .strength-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; height: 4px; background: var(--bg-surface); border-radius: 2px; overflow: hidden; }
-        .strength-fill { height: 100%; border-radius: 2px; transition: all 0.3s; }
-        .strength-bar span { font-size: 11px; font-weight: 600; white-space: nowrap; }
+        .strength-wrapper { margin-bottom: 12px; }
+        .strength-track { height: 4px; background: var(--bg-surface); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+        .strength-fill { height: 100%; border-radius: 2px; transition: width 0.35s ease, background 0.35s ease; }
+        .strength-label { font-size: 11px; font-weight: 600; white-space: nowrap; }
         .terms-row { display: flex; align-items: center; gap: 8px; margin: 16px 0; font-size: 12px; color: var(--text-secondary); cursor: pointer; }
         .terms-row input { accent-color: var(--accent-green); }
         .submit-btn { width: 100%; padding: 14px; font-size: 15px; }
