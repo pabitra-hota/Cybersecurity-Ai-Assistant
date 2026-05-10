@@ -59,8 +59,16 @@ export default function SignupPage() {
       router.push('/dashboard');
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
-      if (code !== 'auth/popup-closed-by-user') {
-        setError('Google sign-up failed. Please try again.');
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        // User closed the popup — not an error
+      } else if (code === 'auth/unauthorized-domain') {
+        setError('This domain is not authorized for Google sign-in. Please contact support.');
+      } else if (code === 'auth/popup-blocked') {
+        setError('Popup was blocked by your browser. Please allow popups for this site and try again.');
+      } else if (code === 'auth/network-request-failed') {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError(`Google sign-up failed (${code ?? 'unknown'}). Please try again.`);
       }
       setLoading(false);
     }
