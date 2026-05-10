@@ -5,11 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Home, FileSearch, Link2, Search, FileText,
-  BarChart3, MessageSquare, Settings, LogOut, Shield,
-  ChevronLeft,
+  BarChart3, MessageSquare, Shield, ChevronLeft,
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import { useAuth } from '@/lib/auth-context';
 import styles from './Sidebar.module.css';
 
 const navItems = [
@@ -25,13 +23,6 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { sidebarOpen, toggleSidebar, activeThreatCount } = useStore();
-
-  // ── Use REAL Firebase user, not the Zustand store's hardcoded user ──
-  const { user, signOut } = useAuth();
-  const displayName = user?.displayName || user?.email?.split('@')[0] || 'User';
-  const email = user?.email || '';
-  const photoURL = user?.photoURL || '';
-  const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
     <>
@@ -83,38 +74,7 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* User section — powered by Firebase Auth */}
-        <div className={styles['sidebar-footer']}>
-          <div className={styles['user-info']}>
-            <div className={styles['user-avatar']}>
-              {photoURL ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={photoURL} alt={displayName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                <div className={styles['avatar-placeholder']}>
-                  {initials}
-                </div>
-              )}
-            </div>
-            <div className={styles['user-details']}>
-              <span className={styles['user-name']}>{displayName}</span>
-              <span className={styles['user-email']}>{email}</span>
-            </div>
-          </div>
-          <div className={styles['sidebar-actions']}>
-            <Link href="/dashboard/settings" className={styles['sidebar-action-btn']}>
-              <Settings size={16} />
-            </Link>
-            <button
-              id="sidebar-logout-btn"
-              className={styles['sidebar-action-btn']}
-              onClick={signOut}
-              title="Sign out"
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
-        </div>
+
       </aside>
     </>
   );
