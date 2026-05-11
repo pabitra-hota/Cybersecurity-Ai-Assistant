@@ -1,25 +1,34 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Upload, FileIcon, Shield, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import LoadingShield from '@/components/shared/LoadingShield';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
 import { formatFileSize, getVerdictColor } from '@/lib/utils';
+import { useStore } from '@/store/useStore';
 
 export default function FileScanPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [scanning, setScanning] = useState(false);
-  const [result, setResult] = useState<Record<string, unknown> | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [step, setStep] = useState('');
-  const [dragOver, setDragOver] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  // ── Read state from the global store (persists across tab switches) ──
+  const { fileScan, setFileScan, resetFileScan } = useStore();
+  const { scanning, result, error, progress, step } = fileScan;
 
+  // We keep the actual File object in a ref because File is not serialisable
+  // to the store. The store saves metadata (name/size/type) for display.
+  const fileRef = useRef<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = React.useState(false);
+
+  // When user picks a file, save the File object to the ref and
+  // save display metadata (name, size, type) to the store.
   const handleFile = (f: File) => {
-    setFile(f);
-    setResult(null);
-    setError(null);
+    fileRef.current = f;
+    setFileScan({
+      file: { name: f.name, size: f.size, type: f.type },
+      result: null,
+      error: null,
+      progress: 0,
+      step: '',
+    });
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -30,25 +39,21 @@ export default function FileScanPage() {
   };
 
   const scanFile = async () => {
+    const file = fileRef.current;
     if (!file) return;
-    setScanning(true);
-    setError(null);
-    setResult(null);
-    setProgress(0);
+
+    setFileScan({ scanning: true, error: null, result: null, progress: 0 });
 
     try {
-      setStep('Uploading file...');
-      setProgress(10);
+      setFileScan({ step: 'Uploading file...', progress: 10 });
       const formData = new FormData();
       formData.append('file', file);
 
-      setStep('Scanning with 70+ engines...');
-      setProgress(30);
+      setFileScan({ step: 'Scanning with 70+ engines...', progress: 30 });
 
       const res = await fetch('/api/scan/file', { method: 'POST', body: formData });
 
-      setStep('AI analyzing results...');
-      setProgress(70);
+      setFileScan({ step: 'AI analyzing results...', progress: 70 });
 
       if (!res.ok) {
         const errData = await res.json();
@@ -56,18 +61,19 @@ export default function FileScanPage() {
       }
 
       const data = await res.json();
-      setProgress(100);
-      setStep('Complete');
-      setResult(data);
+      setFileScan({ progress: 100, step: 'Complete', result: data });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Scan failed');
+      setFileScan({ error: err instanceof Error ? err.message : 'Scan failed' });
     } finally {
-      setScanning(false);
+      setFileScan({ scanning: false });
     }
   };
 
   const verdictColor = result ? getVerdictColor(result.verdict as string) : '';
-  const VerdictIcon = result?.verdict === 'Clean' ? CheckCircle : result?.verdict === 'Suspicious' ? AlertTriangle : XCircle;
+  const VerdictIcon =
+    result?.verdict === 'Clean' ? CheckCircle
+    : result?.verdict === 'Suspicious' ? AlertTriangle
+    : XCircle;
 
   return (
     <div className="file-scan-page">
@@ -76,7 +82,7 @@ export default function FileScanPage() {
 
       {/* Drop Zone */}
       <div
-        className={`drop-zone glass-card ${dragOver ? 'drop-active' : ''} ${file ? 'has-file' : ''}`}
+        className={`drop-zone glass-card ${dragOver ? 'drop-active' : ''} ${fileScan.file ? 'has-file' : ''}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
@@ -88,12 +94,12 @@ export default function FileScanPage() {
           onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
           style={{ display: 'none' }}
         />
-        {file ? (
+        {fileScan.file ? (
           <div className="file-preview">
             <FileIcon size={40} style={{ color: 'var(--accent-green)' }} />
             <div className="file-info">
-              <span className="file-name">{file.name}</span>
-              <span className="file-meta">{formatFileSize(file.size)} · {file.type || 'Unknown type'}</span>
+              <span className="file-name">{fileScan.file.name}</span>
+              <span className="file-meta">{formatFileSize(fileScan.file.size)} · {fileScan.file.type || 'Unknown type'}</span>
             </div>
           </div>
         ) : (
@@ -105,8 +111,8 @@ export default function FileScanPage() {
         )}
       </div>
 
-      {/* Scan Button */}
-      {file && !scanning && !result && (
+      {/* Scan Button — shown only when a file is selected and not currently scanning */}
+      {fileScan.file && !scanning && !result && (
         <button className="btn-primary scan-btn" onClick={scanFile}>
           <Shield size={18} />
           Scan File
@@ -183,11 +189,11 @@ export default function FileScanPage() {
           </div>
 
           {/* Engine Results Table */}
-          {(result.engine_results as Array<Record<string,string>>)?.length > 0 && (
+          {(result.engine_results as Array<Record<string, string>>)?.length > 0 && (
             <div className="engines-section glass-card">
               <h4>Engine Results</h4>
               <div className="engines-table">
-                {(result.engine_results as Array<Record<string,string>>).slice(0, 20).map((eng, i) => (
+                {(result.engine_results as Array<Record<string, string>>).slice(0, 20).map((eng, i) => (
                   <div key={i} className="engine-row">
                     <span className="engine-name">{eng.engine_name}</span>
                     <span className={`engine-result ${eng.category === 'malicious' ? 'malicious' : eng.category === 'suspicious' ? 'suspicious' : 'clean'}`}>
@@ -199,7 +205,8 @@ export default function FileScanPage() {
             </div>
           )}
 
-          <button className="btn-secondary" onClick={() => { setFile(null); setResult(null); }}>
+          {/* Reset button — clears store state and the file ref */}
+          <button className="btn-secondary" onClick={() => { fileRef.current = null; resetFileScan(); }}>
             Scan Another File
           </button>
         </div>

@@ -1,33 +1,46 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link2, Shield, AlertTriangle, CheckCircle, XCircle, Lock } from 'lucide-react';
 import LoadingShield from '@/components/shared/LoadingShield';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
 import { isValidUrl, getVerdictColor } from '@/lib/utils';
+import { useStore } from '@/store/useStore';
 
 export default function UrlScanPage() {
-  const [url, setUrl] = useState('');
-  const [scanning, setScanning] = useState(false);
-  const [result, setResult] = useState<Record<string, unknown> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // ── Read state from the global store (persists across tab switches) ──
+  const { urlScan, setUrlScan, resetUrlScan } = useStore();
+  const { url, scanning, result, error } = urlScan;
 
   const scanUrl = async () => {
-    if (!url || !isValidUrl(url)) { setError('Please enter a valid URL'); return; }
-    setScanning(true); setError(null); setResult(null);
+    if (!url || !isValidUrl(url)) {
+      setUrlScan({ error: 'Please enter a valid URL' });
+      return;
+    }
+    setUrlScan({ scanning: true, error: null, result: null });
     try {
       const res = await fetch('/api/scan/url', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
       });
-      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Scan failed'); }
-      setResult(await res.json());
-    } catch (err) { setError(err instanceof Error ? err.message : 'Scan failed'); }
-    finally { setScanning(false); }
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Scan failed');
+      }
+      setUrlScan({ result: await res.json() });
+    } catch (err) {
+      setUrlScan({ error: err instanceof Error ? err.message : 'Scan failed' });
+    } finally {
+      setUrlScan({ scanning: false });
+    }
   };
 
   const verdictColor = result ? getVerdictColor(result.verdict as string) : '';
-  const VIcon = result?.verdict === 'Safe' || result?.verdict === 'Clean' ? CheckCircle : result?.verdict === 'Suspicious' ? AlertTriangle : XCircle;
+  const VIcon =
+    result?.verdict === 'Safe' || result?.verdict === 'Clean' ? CheckCircle
+    : result?.verdict === 'Suspicious' ? AlertTriangle
+    : XCircle;
 
   return (
     <div className="url-scan-page">
@@ -36,14 +49,31 @@ export default function UrlScanPage() {
 
       <div className="url-input-group glass-card">
         <Lock size={18} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-        <input className="url-input" type="url" placeholder="https://example.com/suspicious-page" value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && scanUrl()} />
+        <input
+          className="url-input"
+          type="url"
+          placeholder="https://example.com/suspicious-page"
+          value={url}
+          onChange={(e) => setUrlScan({ url: e.target.value })}
+          onKeyDown={(e) => e.key === 'Enter' && scanUrl()}
+        />
         <button className="btn-primary" onClick={scanUrl} disabled={scanning || !url}>
           <Shield size={16} /> Scan
         </button>
       </div>
 
-      {scanning && <div className="scan-progress glass-card"><LoadingShield message="Scanning URL with 90+ engines..." /></div>}
-      {error && <div className="error-banner"><AlertTriangle size={16} /><span>{error}</span></div>}
+      {scanning && (
+        <div className="scan-progress glass-card">
+          <LoadingShield message="Scanning URL with 90+ engines..." />
+        </div>
+      )}
+
+      {error && (
+        <div className="error-banner">
+          <AlertTriangle size={16} />
+          <span>{error}</span>
+        </div>
+      )}
 
       {result && (
         <div className="results-section animate-slide-up">
@@ -54,7 +84,8 @@ export default function UrlScanPage() {
               <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6 }}>{result.ai_explanation as string}</p>
             </div>
             <div className="risk-circle" style={{ borderColor: verdictColor }}>
-              <AnimatedCounter value={result.risk_score as number} suffix="/100" /><span className="risk-lbl">Risk</span>
+              <AnimatedCounter value={result.risk_score as number} suffix="/100" />
+              <span className="risk-lbl">Risk</span>
             </div>
           </div>
 
@@ -75,7 +106,10 @@ export default function UrlScanPage() {
             <p>{result.ai_recommendation as string}</p>
           </div>
 
-          <button className="btn-secondary" onClick={() => { setUrl(''); setResult(null); }}>Scan Another URL</button>
+          {/* Reset button — clears URL and results from the store */}
+          <button className="btn-secondary" onClick={resetUrlScan}>
+            Scan Another URL
+          </button>
         </div>
       )}
 
